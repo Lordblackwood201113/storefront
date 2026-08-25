@@ -29,6 +29,12 @@ export function AddressFormFields({
   const t = useTranslations("address");
   const tc = useTranslations("common");
   const hasStates = states.length > 0;
+  // Spree porte `zipcode_required` sur chaque pays, mais le formulaire d'origine
+  // marquait le code postal obligatoire en dur. Dans les pays qui n'utilisent pas
+  // de code postal — la Côte d'Ivoire notamment — le client était contraint d'en
+  // inventer un pour pouvoir commander.
+  const selectedCountry = countries.find((c) => c.iso === address.country_iso);
+  const zipRequired = selectedCountry?.zipcode_required ?? true;
 
   return (
     <div className="flex flex-col gap-3">
@@ -59,6 +65,9 @@ export function AddressFormFields({
           type="text"
           id={`${idPrefix}-first_name`}
           aria-label={t("firstName")}
+          /* Le formulaire d'origine rendait le nom obligatoire mais pas le
+             prénom : on pouvait commander sans. */
+          required
           value={address.first_name}
           onChange={(e) => onChange("first_name", e.target.value)}
           placeholder={t("firstName")}
@@ -105,8 +114,10 @@ export function AddressFormFields({
         placeholder={t("apartment")}
       />
 
-      {/* City / State / ZIP — 3 columns */}
-      <div className="grid grid-cols-3 gap-3">
+      {/* Ville / Région / Code postal — la 3e colonne disparaît avec le code postal */}
+      <div
+        className={`grid gap-3 ${zipRequired ? "grid-cols-3" : "grid-cols-2"}`}
+      >
         <Input
           type="text"
           id={`${idPrefix}-city`}
@@ -153,15 +164,17 @@ export function AddressFormFields({
             placeholder={t("stateProvince")}
           />
         )}
-        <Input
-          type="text"
-          id={`${idPrefix}-postal_code`}
-          aria-label={t("zipCode")}
-          required
-          value={address.postal_code}
-          onChange={(e) => onChange("postal_code", e.target.value)}
-          placeholder={t("zipCode")}
-        />
+        {zipRequired && (
+          <Input
+            type="text"
+            id={`${idPrefix}-postal_code`}
+            aria-label={t("zipCode")}
+            required
+            value={address.postal_code}
+            onChange={(e) => onChange("postal_code", e.target.value)}
+            placeholder={t("zipCode")}
+          />
+        )}
       </div>
 
       {/* Phone */}
@@ -169,6 +182,8 @@ export function AddressFormFields({
         type="tel"
         id={`${idPrefix}-phone`}
         aria-label={t("phone")}
+        /* Requis : en paiement à la livraison, le livreur doit pouvoir appeler. */
+        required
         value={address.phone}
         onChange={(e) => onChange("phone", e.target.value)}
         placeholder={t("phone")}
