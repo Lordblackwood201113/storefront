@@ -42,16 +42,38 @@ interface AddressSectionProps {
   user?: User | null;
 }
 
-const REQUIRED_ADDRESS_FIELDS: (keyof AddressFormData)[] = [
+// Cette liste doit refleter exactement les champs que AddressFormFields rend :
+// exiger un champ que le formulaire n'affiche pas rend l'adresse eternellement
+// « incomplete », elle n'est alors jamais transmise a Spree et aucun mode de
+// livraison ne peut etre calcule.
+const BASE_ADDRESS_FIELDS: (keyof AddressFormData)[] = [
+  "first_name",
   "last_name",
   "address1",
   "city",
-  "postal_code",
   "country_iso",
+  "phone",
 ];
 
-function isAddressComplete(address: AddressFormData): boolean {
-  return REQUIRED_ADDRESS_FIELDS.every((field) => address[field].trim() !== "");
+function requiredAddressFields(
+  country: Country | undefined,
+): (keyof AddressFormData)[] {
+  const fields = [...BASE_ADDRESS_FIELDS];
+  // Memes conditions que le formulaire : code postal et region ne sont exiges
+  // que la ou le pays les impose.
+  if (country?.zipcode_required) fields.push("postal_code");
+  if (country?.states_required) fields.push("state_abbr");
+  return fields;
+}
+
+function isAddressComplete(
+  address: AddressFormData,
+  countries: Country[],
+): boolean {
+  const country = countries.find((c) => c.iso === address.country_iso);
+  return requiredAddressFields(country).every(
+    (field) => address[field].trim() !== "",
+  );
 }
 
 function buildAutoSaveHash(
@@ -172,7 +194,7 @@ export function AddressSection({
         return;
       }
 
-      if (!isAddressComplete(currentAddress)) return;
+      if (!isAddressComplete(currentAddress, countries)) return;
 
       const hash = buildAutoSaveHash(currentEmail, currentAddress);
       if (hash === lastSavedRef.current) return;
@@ -186,7 +208,7 @@ export function AddressSection({
         // Allow retry on next blur
       }
     },
-    [onAutoSave],
+    [onAutoSave, countries],
   );
 
   // Auto-save the pre-selected saved address on mount
@@ -223,7 +245,7 @@ export function AddressSection({
   const handleEmailBlur = () => {
     // If address is complete, tryAutoSave sends email + address in one call.
     // Only call onEmailBlur (email-only save) when address is incomplete.
-    if (isAddressComplete(shipAddress) || selectedSavedAddressId) {
+    if (isAddressComplete(shipAddress, countries) || selectedSavedAddressId) {
       tryAutoSave(effectiveEmail, shipAddress, selectedSavedAddressId);
     } else {
       onEmailBlur(effectiveEmail);
