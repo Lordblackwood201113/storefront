@@ -62,7 +62,6 @@ function requiredAddressFields(
   // Memes conditions que le formulaire : code postal et region ne sont exiges
   // que la ou le pays les impose.
   if (country?.zipcode_required) fields.push("postal_code");
-  if (country?.states_required) fields.push("state_abbr");
   return fields;
 }
 
@@ -71,9 +70,21 @@ function isAddressComplete(
   countries: Country[],
 ): boolean {
   const country = countries.find((c) => c.iso === address.country_iso);
-  return requiredAddressFields(country).every(
+  const complet = requiredAddressFields(country).every(
     (field) => address[field].trim() !== "",
   );
+  if (!complet) return false;
+  // La region accepte deux formes : la liste deroulante remplit state_abbr, le
+  // repli texte remplit state_name. N'exiger que la premiere rendrait le repli
+  // inerte, et l'adresse resterait bloquee si les regions ne chargeaient pas.
+  if (
+    country?.states_required &&
+    !address.state_abbr.trim() &&
+    !address.state_name.trim()
+  ) {
+    return false;
+  }
+  return true;
 }
 
 function buildAutoSaveHash(

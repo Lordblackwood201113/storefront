@@ -42,13 +42,26 @@ export function AddressFormFields({
   // La zone n'est demandée que si le pays l'exige (Spree : states_required).
   // Passer ce réglage à false côté Spree fait disparaître le champ ici même.
   const stateRequired = selectedCountry?.states_required ?? false;
-  const showState = stateRequired && (hasStates || loadingStates);
+  // Toujours rendu des que le pays l'impose. Le conditionner a hasStates creait
+  // une impasse muette : si le chargement des regions echouait, le champ
+  // disparaissait alors qu'il restait obligatoire, et l'adresse n'etait plus
+  // jamais enregistree.
+  const showState = stateRequired;
 
   useEffect(() => {
     if (singleCountry && !address.country_iso) {
       onChange("country_iso", countries[0].iso);
     }
   }, [singleCountry, address.country_iso, countries, onChange]);
+
+  // Sans valeur par defaut, un client qui ne deroule pas la liste laisse la
+  // region vide. Aucun <form> n'entoure le tunnel : l'attribut `required` du
+  // select est donc inerte, rien ne l'avertirait, et l'adresse ne partirait pas.
+  useEffect(() => {
+    if (stateRequired && hasStates && !address.state_abbr) {
+      onChange("state_abbr", states[0].abbr);
+    }
+  }, [stateRequired, hasStates, address.state_abbr, states, onChange]);
 
   return (
     <div className="flex flex-col gap-3">

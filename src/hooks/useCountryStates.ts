@@ -1,5 +1,5 @@
 import type { State } from "@spree/sdk";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * Fetches states for a country ISO code, with cleanup on unmount/change.
@@ -11,7 +11,11 @@ export function useCountryStates(
   enabled = true,
 ): [State[], boolean] {
   const [states, setStates] = useState<State[]>([]);
-  const [isPending, startTransition] = useTransition();
+  // useTransition ne convenait pas ici : startTransition recevait un callback
+  // synchrone qui ne rendait pas la promesse, si bien que isPending retombait a
+  // false immediatement. « En cours de chargement » etait donc toujours faux, et
+  // le formulaire pouvait masquer le champ region pendant tout le chargement.
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!enabled || !countryIso) {
@@ -20,21 +24,23 @@ export function useCountryStates(
     }
 
     let cancelled = false;
+    setLoading(true);
 
-    startTransition(() => {
-      fetchStates(countryIso)
-        .then((result) => {
-          if (!cancelled) setStates(result);
-        })
-        .catch(() => {
-          if (!cancelled) setStates([]);
-        });
-    });
+    fetchStates(countryIso)
+      .then((result) => {
+        if (!cancelled) setStates(result);
+      })
+      .catch(() => {
+        if (!cancelled) setStates([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
 
     return () => {
       cancelled = true;
     };
   }, [countryIso, fetchStates, enabled]);
 
-  return [states, isPending];
+  return [states, loading];
 }
