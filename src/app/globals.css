@@ -18,17 +18,17 @@
   --animate-hamburger-bottom-open: hamburger-bottom-open 0.35s ease-in-out forwards;
   --animate-hamburger-bottom-close: hamburger-bottom-close 0.35s ease-in-out forwards;
 
-  --color-primary-50: #eff6ff;
-  --color-primary-100: #dbeafe;
-  --color-primary-200: #bfdbfe;
-  --color-primary-300: #93c5fd;
-  --color-primary-400: #60a5fa;
-  --color-primary-500: #0077ff;
-  --color-primary-600: #0066dd;
-  --color-primary-700: #0055bb;
-  --color-primary-800: #004499;
-  --color-primary-900: #003377;
-  --color-primary-950: #001d4d;
+  --color-primary-50: #fff1f2;
+  --color-primary-100: #ffe4e6;
+  --color-primary-200: #fecdd3;
+  --color-primary-300: #fda4af;
+  --color-primary-400: #fb7185;
+  --color-primary-500: #e11d48;
+  --color-primary-600: #be123c;
+  --color-primary-700: #9f1239;
+  --color-primary-800: #881337;
+  --color-primary-900: #6d0f2c;
+  --color-primary-950: #4c0519;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
