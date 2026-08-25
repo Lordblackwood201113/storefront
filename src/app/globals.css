@@ -266,3 +266,33 @@ input[type="search"]::-webkit-search-cancel-button {
     @apply font-sans;
   }
 }
+
+/*
+ * Carrousel du bandeau d'accueil : les puces par défaut de Swiper sont
+ * bleues et opaques, illisibles sur photo. On les repositionne au-dessus du
+ * voile assombrissant (z-20) et on les passe en blanc translucide.
+ */
+.hero-carousel .swiper-pagination {
+  bottom: 1.5rem;
+  z-index: 20;
+}
+.hero-carousel .swiper-pagination-bullet {
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  opacity: 0.45;
+  transition: opacity 0.2s ease, width 0.2s ease;
+}
+.hero-carousel .swiper-pagination-bullet-active {
+  opacity: 1;
+  width: 24px;
+  border-radius: 4px;
+}
+.hero-carousel,
+.hero-carousel .swiper-wrapper,
+.hero-carousel .swiper-slide {
+  height: 100%;
+}
+.hero-carousel .swiper-slide {
+  position: relative;
+}
