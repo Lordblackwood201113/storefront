@@ -200,7 +200,7 @@ export function AddressSection({
       addressToFormData(initialSavedAddress),
       initialSavedAddress.id,
     );
-  }, [initialSavedAddress, email, tryAutoSave]);
+  }, [initialSavedAddress, email, tryAutoSave, effectiveEmail]);
 
   const updateShipAddress = (field: keyof AddressFormData, value: string) => {
     setShipAddress((prev) => updateAddressField(prev, field, value));

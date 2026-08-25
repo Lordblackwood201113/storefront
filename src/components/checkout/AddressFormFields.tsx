@@ -125,49 +125,44 @@ export function AddressFormFields({
           onChange={(e) => onChange("city", e.target.value)}
           placeholder={t("city")}
         />
-        {showState && (
-          <>
-            {loadingStates ? (
-              <NativeSelect
-                id={`${idPrefix}-state`}
-                aria-label={t("stateProvince")}
-                className="w-full"
-                disabled
-              >
-                <NativeSelectOption value="">
-                  {tc("loading")}
+        {showState &&
+          (loadingStates ? (
+            <NativeSelect
+              id={`${idPrefix}-state`}
+              aria-label={t("stateProvince")}
+              className="w-full"
+              disabled
+            >
+              <NativeSelectOption value="">{tc("loading")}</NativeSelectOption>
+            </NativeSelect>
+          ) : hasStates ? (
+            <NativeSelect
+              id={`${idPrefix}-state`}
+              aria-label={t("stateProvince")}
+              className="w-full"
+              value={address.state_abbr}
+              onChange={(e) => onChange("state_abbr", e.target.value)}
+              required
+            >
+              <NativeSelectOption value="" disabled>
+                {t("selectState")}
+              </NativeSelectOption>
+              {states.map((state) => (
+                <NativeSelectOption key={state.abbr} value={state.abbr}>
+                  {state.name}
                 </NativeSelectOption>
-              </NativeSelect>
-            ) : hasStates ? (
-              <NativeSelect
-                id={`${idPrefix}-state`}
-                aria-label={t("stateProvince")}
-                className="w-full"
-                value={address.state_abbr}
-                onChange={(e) => onChange("state_abbr", e.target.value)}
-                required
-              >
-                <NativeSelectOption value="" disabled>
-                  {t("selectState")}
-                </NativeSelectOption>
-                {states.map((state) => (
-                  <NativeSelectOption key={state.abbr} value={state.abbr}>
-                    {state.name}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
-            ) : (
-              <Input
-                type="text"
-                id={`${idPrefix}-state`}
-                aria-label={t("stateProvince")}
-                value={address.state_name}
-                onChange={(e) => onChange("state_name", e.target.value)}
-                placeholder={t("stateProvince")}
-              />
-            )}
-          </>
-        )}
+              ))}
+            </NativeSelect>
+          ) : (
+            <Input
+              type="text"
+              id={`${idPrefix}-state`}
+              aria-label={t("stateProvince")}
+              value={address.state_name}
+              onChange={(e) => onChange("state_name", e.target.value)}
+              placeholder={t("stateProvince")}
+            />
+          ))}
         {zipRequired && (
           <Input
             type="text"
