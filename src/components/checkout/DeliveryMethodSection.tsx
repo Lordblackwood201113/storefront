@@ -28,6 +28,13 @@ export function DeliveryMethodSection({
         {t("shippingMethod")}
       </h2>
 
+      <div className="rounded-sm border border-gray-300 bg-gray-50 px-4 py-3 mb-3">
+        <p className="text-sm font-medium text-gray-900">
+          {t("shippingFeeRange")}
+        </p>
+        <p className="text-xs text-gray-600 mt-1">{t("shippingFeeNotice")}</p>
+      </div>
+
       {errors && errors.length > 0 && (
         <div className="rounded-sm border border-red-300 bg-red-50 px-4 py-3 mb-3">
           {errors.map((error, index) => (
@@ -91,7 +98,9 @@ export function DeliveryMethodSection({
                         </span>
                       </div>
                       <span className="text-sm text-gray-900">
-                        {rate.display_cost}
+                        {Number.parseFloat(rate.cost) === 0
+                          ? t("shippingFeeToBeConfirmed")
+                          : rate.display_cost}
                       </span>
                     </label>
                   ))}

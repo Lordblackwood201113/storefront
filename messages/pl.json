@@ -267,7 +267,10 @@
     "policyConsentRequired": "Musisz zaakceptować regulamin sklepu przed złożeniem zamówienia",
     "iAgreeToThe": "Zgadzam się z",
     "policySeparatorComma": ", ",
-    "policySeparatorAnd": " i "
+    "policySeparatorAnd": " i ",
+    "shippingFeeRange": "Delivery fee: between 1,500 F and 3,000 F",
+    "shippingFeeNotice": "The exact amount depends on your area. It will be confirmed by WhatsApp after you place your order, and paid to the courier.",
+    "shippingFeeToBeConfirmed": "To be confirmed"
   },
   "address": {
     "firstName": "Imię",

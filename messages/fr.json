@@ -267,7 +267,10 @@
     "policyConsentRequired": "Vous devez accepter les politiques du magasin avant de passer votre commande",
     "iAgreeToThe": "J'accepte les",
     "policySeparatorComma": ", ",
-    "policySeparatorAnd": " et "
+    "policySeparatorAnd": " et ",
+    "shippingFeeRange": "Frais de livraison : entre 1 500 F et 3 000 F",
+    "shippingFeeNotice": "Le montant exact dépend de votre zone. Il vous sera précisé par WhatsApp après validation de votre commande, et réglé au livreur.",
+    "shippingFeeToBeConfirmed": "À préciser"
   },
   "address": {
     "firstName": "Prénom",
