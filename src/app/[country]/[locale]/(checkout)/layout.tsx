@@ -28,8 +28,9 @@ function CheckoutHeader() {
         <Image
           src="/spree.png"
           alt={storeName}
-          width={90}
-          height={32}
+          width={919}
+          height={200}
+          className="h-8 w-auto object-contain"
           fetchPriority="high"
           loading="eager"
         />

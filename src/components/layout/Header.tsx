@@ -76,10 +76,9 @@ export async function Header({
           <Image
             src="/spree.png"
             alt={storeName}
-            width={90}
-            height={32}
-            className="max-w-full object-contain"
-            style={{ width: "auto", height: "auto" }}
+            width={919}
+            height={200}
+            className="h-8 w-auto max-w-full object-contain sm:h-10"
             fetchPriority="high"
             loading="eager"
           />
