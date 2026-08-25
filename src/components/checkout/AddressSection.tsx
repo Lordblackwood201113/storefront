@@ -4,7 +4,7 @@ import type { Address, AddressParams, Cart, Country, State } from "@spree/sdk";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AddressEditModal } from "@/components/checkout/AddressEditModal";
 import { AddressFormFields } from "@/components/checkout/AddressFormFields";
 import { AddressSelector } from "@/components/checkout/AddressSelector";
@@ -15,6 +15,7 @@ import {
   type AddressFormData,
   addressToFormData,
   formDataToAddress,
+  resolveOrderEmail,
   updateAddressField,
 } from "@/lib/utils/address";
 
@@ -131,6 +132,13 @@ export function AddressSection({
     fetchStates,
   );
 
+  // Le champ e-mail est facultatif : quand il est vide, on transmet à Spree une
+  // adresse dérivée du téléphone, faute de quoi la finalisation échouerait.
+  const effectiveEmail = useMemo(
+    () => resolveOrderEmail(email, shipAddress.phone),
+    [email, shipAddress.phone],
+  );
+
   const lastSavedRef = useRef<string>("");
   const mountAutoSaveFiredRef = useRef(false);
   const processingRef = useRef(processing);
@@ -184,7 +192,7 @@ export function AddressSection({
   // Auto-save the pre-selected saved address on mount
   useEffect(() => {
     if (mountAutoSaveFiredRef.current) return;
-    if (!initialSavedAddress || !email.trim()) return;
+    if (!initialSavedAddress || !effectiveEmail) return;
 
     mountAutoSaveFiredRef.current = true;
     tryAutoSave(
@@ -202,7 +210,7 @@ export function AddressSection({
   };
 
   const handleFieldBlur = () => {
-    tryAutoSave(email, shipAddress, selectedSavedAddressId);
+    tryAutoSave(effectiveEmail, shipAddress, selectedSavedAddressId);
   };
 
   // Only fire auto-save when focus leaves the entire form container,
@@ -216,9 +224,9 @@ export function AddressSection({
     // If address is complete, tryAutoSave sends email + address in one call.
     // Only call onEmailBlur (email-only save) when address is incomplete.
     if (isAddressComplete(shipAddress) || selectedSavedAddressId) {
-      tryAutoSave(email, shipAddress, selectedSavedAddressId);
+      tryAutoSave(effectiveEmail, shipAddress, selectedSavedAddressId);
     } else {
-      onEmailBlur(email);
+      onEmailBlur(effectiveEmail);
     }
   };
 
@@ -226,7 +234,7 @@ export function AddressSection({
     setShipAddress(addressToFormData(address));
     setSelectedSavedAddressId(address.id);
     // Saved address has all fields filled, trigger auto-save immediately
-    tryAutoSave(email, addressToFormData(address), address.id);
+    tryAutoSave(effectiveEmail, addressToFormData(address), address.id);
   };
 
   const handleSaveEditedAddress = async (data: AddressParams, id?: string) => {
@@ -276,7 +284,6 @@ export function AddressSection({
         <Input
           type="email"
           id="email"
-          required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           onBlur={handleEmailBlur}

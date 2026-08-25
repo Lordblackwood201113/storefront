@@ -91,3 +91,32 @@ export function updateAddressField(
   }
   return updated;
 }
+
+/**
+ * E-mail réellement transmis à Spree pour la commande.
+ *
+ * Le champ e-mail est facultatif au paiement, mais Spree l'exige dès que la
+ * commande est finalisée (`Spree::Order#require_email`). Quand le client n'en
+ * donne pas, on en dérive un depuis son numéro de téléphone : sans cela la
+ * commande échouerait à la dernière étape, sans message compréhensible.
+ *
+ * Le domaine utilisé est celui de la boutique, afin que ces adresses soient
+ * captées par le routage e-mail du domaine plutôt que de générer des rebonds,
+ * qui dégraderaient la réputation d'expédition.
+ */
+export function resolveOrderEmail(email: string, phone: string): string {
+  const saisi = email.trim();
+  if (saisi) return saisi;
+
+  const chiffres = phone.replace(/\D/g, "");
+  if (!chiffres) return "";
+
+  let domaine = "example.invalid";
+  try {
+    const brut = process.env.NEXT_PUBLIC_SITE_URL;
+    if (brut) domaine = new URL(brut).hostname;
+  } catch {
+    // domaine de repli conservé
+  }
+  return `tel-${chiffres}@${domaine}`;
+}

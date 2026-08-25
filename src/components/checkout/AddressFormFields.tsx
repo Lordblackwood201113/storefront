@@ -2,6 +2,7 @@
 
 import type { Country, State } from "@spree/sdk";
 import { useTranslations } from "next-intl";
+import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import {
   NativeSelect,
@@ -35,11 +36,24 @@ export function AddressFormFields({
   // inventer un pour pouvoir commander.
   const selectedCountry = countries.find((c) => c.iso === address.country_iso);
   const zipRequired = selectedCountry?.zipcode_required ?? true;
+  // Un seul pays de livraison : le demander n'apporte rien, on le sélectionne
+  // d'office et on masque le champ.
+  const singleCountry = countries.length === 1;
+  // La zone n'est demandée que si le pays l'exige (Spree : states_required).
+  // Passer ce réglage à false côté Spree fait disparaître le champ ici même.
+  const stateRequired = selectedCountry?.states_required ?? false;
+  const showState = stateRequired && (hasStates || loadingStates);
+
+  useEffect(() => {
+    if (singleCountry && !address.country_iso) {
+      onChange("country_iso", countries[0].iso);
+    }
+  }, [singleCountry, address.country_iso, countries, onChange]);
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Country — full width, floating label style */}
-      <div className="relative">
+      {/* Pays — masqué lorsqu'un seul pays est proposé */}
+      <div className={`relative ${singleCountry ? "hidden" : ""}`}>
         <NativeSelect
           id={`${idPrefix}-country`}
           aria-label={t("country")}
@@ -84,14 +98,6 @@ export function AddressFormFields({
       </div>
 
       {/* Company */}
-      <Input
-        type="text"
-        id={`${idPrefix}-company`}
-        aria-label={t("company")}
-        value={address.company}
-        onChange={(e) => onChange("company", e.target.value)}
-        placeholder={t("company")}
-      />
 
       {/* Address */}
       <Input
@@ -105,18 +111,10 @@ export function AddressFormFields({
       />
 
       {/* Apartment */}
-      <Input
-        type="text"
-        id={`${idPrefix}-address2`}
-        aria-label={t("apartment")}
-        value={address.address2}
-        onChange={(e) => onChange("address2", e.target.value)}
-        placeholder={t("apartment")}
-      />
 
       {/* Ville / Région / Code postal — la 3e colonne disparaît avec le code postal */}
       <div
-        className={`grid gap-3 ${zipRequired ? "grid-cols-3" : "grid-cols-2"}`}
+        className={`grid gap-3 ${[showState, zipRequired].filter(Boolean).length === 2 ? "grid-cols-3" : [showState, zipRequired].some(Boolean) ? "grid-cols-2" : "grid-cols-1"}`}
       >
         <Input
           type="text"
@@ -127,42 +125,48 @@ export function AddressFormFields({
           onChange={(e) => onChange("city", e.target.value)}
           placeholder={t("city")}
         />
-        {loadingStates ? (
-          <NativeSelect
-            id={`${idPrefix}-state`}
-            aria-label={t("stateProvince")}
-            className="w-full"
-            disabled
-          >
-            <NativeSelectOption value="">{tc("loading")}</NativeSelectOption>
-          </NativeSelect>
-        ) : hasStates ? (
-          <NativeSelect
-            id={`${idPrefix}-state`}
-            aria-label={t("stateProvince")}
-            className="w-full"
-            value={address.state_abbr}
-            onChange={(e) => onChange("state_abbr", e.target.value)}
-            required
-          >
-            <NativeSelectOption value="" disabled>
-              {t("selectState")}
-            </NativeSelectOption>
-            {states.map((state) => (
-              <NativeSelectOption key={state.abbr} value={state.abbr}>
-                {state.name}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
-        ) : (
-          <Input
-            type="text"
-            id={`${idPrefix}-state`}
-            aria-label={t("stateProvince")}
-            value={address.state_name}
-            onChange={(e) => onChange("state_name", e.target.value)}
-            placeholder={t("stateProvince")}
-          />
+        {showState && (
+          <>
+            {loadingStates ? (
+              <NativeSelect
+                id={`${idPrefix}-state`}
+                aria-label={t("stateProvince")}
+                className="w-full"
+                disabled
+              >
+                <NativeSelectOption value="">
+                  {tc("loading")}
+                </NativeSelectOption>
+              </NativeSelect>
+            ) : hasStates ? (
+              <NativeSelect
+                id={`${idPrefix}-state`}
+                aria-label={t("stateProvince")}
+                className="w-full"
+                value={address.state_abbr}
+                onChange={(e) => onChange("state_abbr", e.target.value)}
+                required
+              >
+                <NativeSelectOption value="" disabled>
+                  {t("selectState")}
+                </NativeSelectOption>
+                {states.map((state) => (
+                  <NativeSelectOption key={state.abbr} value={state.abbr}>
+                    {state.name}
+                  </NativeSelectOption>
+                ))}
+              </NativeSelect>
+            ) : (
+              <Input
+                type="text"
+                id={`${idPrefix}-state`}
+                aria-label={t("stateProvince")}
+                value={address.state_name}
+                onChange={(e) => onChange("state_name", e.target.value)}
+                placeholder={t("stateProvince")}
+              />
+            )}
+          </>
         )}
         {zipRequired && (
           <Input
